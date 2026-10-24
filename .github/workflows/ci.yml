@@ -25,9 +25,6 @@ jobs:
       - name: Resolve VPN package dependencies
         run: |
           sudo apt-get install --simulate -y strongswan-starter strongswan-charon libstrongswan-standard-plugins libcharon-extra-plugins xl2tpd ppp iptables iptables-persistent curl openssl
-      - name: Resolve VPN package dependencies
-        run: |
-          apt-get install --simulate -y strongswan-starter strongswan-charon libstrongswan-standard-plugins libcharon-extra-plugins xl2tpd ppp iptables iptables-persistent curl openssl
       - name: Bash syntax
         run: |
           bash -n install-L2TP_IPSec.sh
@@ -50,6 +47,9 @@ jobs:
           apt-get update
           apt-get install -y bash ca-certificates git grep gawk coreutils shellcheck
       - uses: actions/checkout@v4
+      - name: Resolve VPN package dependencies
+        run: |
+          apt-get install --simulate -y strongswan-starter strongswan-charon libstrongswan-standard-plugins libcharon-extra-plugins xl2tpd ppp iptables iptables-persistent curl openssl
       - name: Bash syntax
         run: |
           bash -n install-L2TP_IPSec.sh
