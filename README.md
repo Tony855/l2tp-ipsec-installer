@@ -40,6 +40,10 @@ sudo bash install-L2TP_IPSec.sh diagnose
 sudo bash install-IKEv2_IPSec.sh diagnose
 ```
 
+## Detailed deployment guide (Chinese)
+
+See [`docs/DEPLOYMENT_GUIDE_ZH-CN.md`](docs/DEPLOYMENT_GUIDE_ZH-CN.md) for step-by-step Debian/Ubuntu deployment, DNS and firewall preparation, IKEv2/L2TP installation, client settings, verification, troubleshooting, backups and rollback.
+
 ## CI validation
 
 GitHub Actions checks Ubuntu 24.04, Ubuntu 26.04 and Debian 13. CI runs `bash -n`, ShellCheck, mocked firewall tests, OS-detection tests and simulates dependency resolution for both installers. It does not run a privileged install or negotiate a real VPN tunnel.
