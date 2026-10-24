@@ -24,10 +24,11 @@ jobs:
           sudo apt-get install -y shellcheck
       - name: Resolve VPN package dependencies
         run: |
-          sudo apt-get install --simulate -y strongswan-starter strongswan-charon libstrongswan-standard-plugins libcharon-extra-plugins xl2tpd ppp iptables iptables-persistent curl openssl
+          sudo apt-get install --simulate -y strongswan-starter strongswan-charon libstrongswan-standard-plugins libcharon-extra-plugins xl2tpd ppp iptables iptables-persistent curl openssl certbot certbot
       - name: Bash syntax
         run: |
           bash -n install-L2TP_IPSec.sh
+          bash -n install-IKEv2_IPSec.sh
           bash -n tests/test_iptables_ensure.sh
           bash -n tests/test_platform_detection.sh
       - name: ShellCheck
@@ -53,6 +54,7 @@ jobs:
       - name: Bash syntax
         run: |
           bash -n install-L2TP_IPSec.sh
+          bash -n install-IKEv2_IPSec.sh
           bash -n tests/test_iptables_ensure.sh
           bash -n tests/test_platform_detection.sh
       - name: ShellCheck
