@@ -1,0 +1,57 @@
+name: Debian and Ubuntu validation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ubuntu:
+    name: Ubuntu ${{ matrix.os }} checks
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-26.04]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+      - name: Bash syntax
+        run: |
+          bash -n install-L2TP_IPSec.sh
+          bash -n tests/test_iptables_ensure.sh
+          bash -n tests/test_platform_detection.sh
+      - name: ShellCheck
+        run: shellcheck --severity=warning install-L2TP_IPSec.sh tests/test_iptables_ensure.sh tests/test_platform_detection.sh
+      - name: Unit tests
+        run: |
+          bash tests/test_iptables_ensure.sh
+          bash tests/test_platform_detection.sh
+
+  debian-13:
+    name: Debian 13 checks
+    runs-on: ubuntu-24.04
+    container: debian:13
+    steps:
+      - name: Install tools
+        run: |
+          apt-get update
+          apt-get install -y bash ca-certificates git grep gawk coreutils shellcheck
+      - uses: actions/checkout@v4
+      - name: Bash syntax
+        run: |
+          bash -n install-L2TP_IPSec.sh
+          bash -n tests/test_iptables_ensure.sh
+          bash -n tests/test_platform_detection.sh
+      - name: ShellCheck
+        run: shellcheck --severity=warning install-L2TP_IPSec.sh tests/test_iptables_ensure.sh tests/test_platform_detection.sh
+      - name: Unit tests
+        run: |
+          bash tests/test_iptables_ensure.sh
+          bash tests/test_platform_detection.sh
