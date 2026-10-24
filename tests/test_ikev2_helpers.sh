@@ -34,8 +34,8 @@ for VPN_USER in 'bad user' 'bad;user' 'user/name' ''; do
   fi
 done
 VPN_USER='vpnuser'
-for VPN_PASSWORD in '' 'contains space' 'quote"bad' 'slash\\bad'; do
-  if ( validate_credentials ) >/dev/null 2>&1; then
+for bad_password in '' 'contains space' 'quote"bad' 'slash\\bad'; do
+  if ( VPN_PASSWORD=$bad_password; validate_credentials ) >/dev/null 2>&1; then
     fail 'invalid password accepted'
   fi
 done
@@ -59,7 +59,7 @@ calls_file=$(mktemp)
 trap 'rm -f "$calls_file"' EXIT
 iptables() {
   printf '%s\n' "$*" >> "$calls_file"
-  if [[ " $* " == *' -C INPUT -p udp --dport 500 '* ]]; then return 0; fi
+  if [[ " $* " == *"-C INPUT -p udp --dport 500"* ]]; then return 0; fi
   if [[ " $* " == *' -C '* ]]; then return 1; fi
   return 0
 }
