@@ -33,7 +33,7 @@ jobs:
           bash -n tests/test_platform_detection.sh
           bash -n tests/test_ikev2_helpers.sh
       - name: ShellCheck
-        run: shellcheck --severity=warning install-L2TP_IPSec.sh install-IKEv2_IPSec.sh tests/test_iptables_ensure.sh tests/test_platform_detection.sh
+        run: shellcheck --severity=warning install-L2TP_IPSec.sh install-IKEv2_IPSec.sh tests/test_iptables_ensure.sh tests/test_platform_detection.sh tests/test_ikev2_helpers.sh
       - name: Unit tests
         run: |
           bash tests/test_iptables_ensure.sh
@@ -59,9 +59,11 @@ jobs:
           bash -n install-IKEv2_IPSec.sh
           bash -n tests/test_iptables_ensure.sh
           bash -n tests/test_platform_detection.sh
+          bash -n tests/test_ikev2_helpers.sh
       - name: ShellCheck
-        run: shellcheck --severity=warning install-L2TP_IPSec.sh install-IKEv2_IPSec.sh tests/test_iptables_ensure.sh tests/test_platform_detection.sh
+        run: shellcheck --severity=warning install-L2TP_IPSec.sh install-IKEv2_IPSec.sh tests/test_iptables_ensure.sh tests/test_platform_detection.sh tests/test_ikev2_helpers.sh
       - name: Unit tests
         run: |
           bash tests/test_iptables_ensure.sh
           bash tests/test_platform_detection.sh
+          bash tests/test_ikev2_helpers.sh
