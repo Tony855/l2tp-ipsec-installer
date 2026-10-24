@@ -1,39 +1,56 @@
-# L2TP/IPsec Installer
+# L2TP/IPsec and IKEv2/IPsec Installers
 
-Debian/Ubuntu-only installer for an L2TP/IPsec VPN endpoint using the traditional strongSwan `ipsec.conf`/starter backend, `xl2tpd`, PPP and iptables.
+Debian/Ubuntu VPN installers using the traditional strongSwan `ipsec.conf` / starter backend.
 
-> Experimental: CI performs syntax, lint and mocked unit tests. It does not prove end-to-end VPN connectivity on a real VM. Test on a disposable host before production.
+> Experimental: GitHub Actions validates Bash syntax, ShellCheck, mocked firewall logic, OS detection and package dependency resolution. It does not prove end-to-end VPN connectivity on a real VM. Test on a disposable host before production.
 
 ## Supported systems
 
-- Debian 12/13 and Ubuntu 22.04/24.04/26.04 (subject to package availability).
-- Other distributions are rejected before any installation changes.
-- Requires root, systemd, PPP/IPsec kernel support and a reachable public IPv4/NAT mapping.
+- Debian 12/13 and Ubuntu 22.04/24.04/26.04, subject to package availability.
+- Other distributions are rejected before installation changes.
+- Requires root, systemd, kernel IPsec support and a reachable public IPv4 address.
+- Do not run either installer on a production host without reviewing the configuration backups and existing VPN stack.
 
-## Install
+## L2TP/IPsec installer
 
 ```bash
 sudo bash install-L2TP_IPSec.sh
 ```
 
-The script asks for a PSK, username and password, then requires typing `YES` before modifying system configuration. Credentials are written to `/root/vpn-config.txt` with mode 0600.
+Prompts for an IPsec PSK, username and password. Requires typing `YES` before modifying system configuration. Credentials are saved in `/root/vpn-config.txt` with mode 0600.
+
+## IKEv2/IPsec installer
+
+```bash
+sudo bash install-IKEv2_IPSec.sh
+```
+
+The IKEv2 installer uses a DNS hostname and a trusted Let's Encrypt certificate, then authenticates users with EAP-MSCHAPv2. The domain must resolve to this server's public IPv4 address. TCP port 80 must be reachable during HTTP-01 certificate issuance; UDP 500 and UDP 4500 must be allowed by the server/cloud firewall.
+
+The installer prompts for a domain, username and password (minimum 12 characters), then requires typing `YES` before changes. Client settings are saved to `/root/ikev2-vpn-config.txt` with mode 0600. Certbot renewal uses a deploy hook to restart the detected strongSwan starter service.
+
+**Important:** Both installers use the same `/etc/ipsec.conf` and `/etc/ipsec.secrets`. Running one after the other backs up and replaces the other's IPsec configuration, so the previous protocol's connection will stop working. They are not yet a combined simultaneous L2TP + IKEv2 configuration.
 
 ## Diagnose
 
+For either installation:
+
 ```bash
 sudo bash install-L2TP_IPSec.sh diagnose
+sudo bash install-IKEv2_IPSec.sh diagnose
 ```
 
-## Validation
+## CI validation
 
-CI tests Ubuntu 24.04, Ubuntu 26.04, and Debian 13. It runs `bash -n`, ShellCheck, OS-detection tests and mocked firewall helper tests. It does not perform a privileged installation or real client negotiation.
+GitHub Actions checks Ubuntu 24.04, Ubuntu 26.04 and Debian 13. CI runs `bash -n`, ShellCheck, mocked firewall tests, OS-detection tests and simulates dependency resolution for both installers. It does not run a privileged install or negotiate a real VPN tunnel.
 
-## Notes
+## Security notes
 
-- This installer intentionally uses `strongswan-starter` and `ipsec.conf`; it refuses to proceed when `charon-systemd` or `strongswan-swanctl` packages are already installed rather than removing an existing VPN stack.
-- L2TP/IPsec with IKEv1 and MS-CHAPv2 is legacy. Use WireGuard or IKEv2 for new deployments when client compatibility allows.
-- Configure cloud firewalls separately. Permit UDP 500/4500; UDP 1701 should be restricted to IPsec-protected traffic.
-- Config files are backed up before replacement, but this is not a fully transactional installer. Review before use on production hosts.
+- IKEv2 uses a publicly trusted certificate and EAP-MSCHAPv2; use strong, unique user passwords.
+- L2TP/IPsec with IKEv1 and MS-CHAPv2 is legacy. Prefer IKEv2 or WireGuard for new deployments.
+- Configure cloud firewalls separately. For IKEv2 allow UDP 500/4500 and TCP 80 only as needed for certificate issuance/renewal; for L2TP also permit UDP 1701 only when protected by IPsec policy.
+- Installers back up configuration files before replacement, but are not fully transactional.
+- Review the system's existing firewall policy before running either installer.
 
 ## License
 
