@@ -7,6 +7,7 @@ source "$SCRIPT_DIR/install-L2TP_IPSec.sh"
 calls_file=$(mktemp)
 trap 'rm -f "$calls_file"' EXIT
 iptables() {
+  local IFS=' '
   printf '%s\n' "$*" >> "$calls_file"
   if [[ " $* " == *' -C INPUT -p udp --dport 500 '* ]]; then
     return 0
