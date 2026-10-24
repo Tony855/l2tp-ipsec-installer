@@ -217,7 +217,9 @@ iptables_ensure() {
     [[ $# -ge 1 ]] || die 'iptables_ensure 缺少链名称。'
     chain=$1; shift
   fi
-  iptables -t "$table" -C "$chain" "$@" 2>/dev/null && return 0
+  if iptables -t "$table" -C "$chain" "$@" 2>/dev/null; then
+    return 0
+  fi
   iptables -t "$table" -A "$chain" "$@"
 }
 
