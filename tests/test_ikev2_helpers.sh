@@ -24,6 +24,8 @@ pass 'domain validation rejects malformed input'
 
 # Credentials: supported characters pass; unsafe syntax and whitespace fail.
 VPN_USER='vpn_user-01@example.com'
+# ShellCheck cannot infer that validate_credentials reads this global indirectly.
+# shellcheck disable=SC2034
 VPN_PASSWORD='long-safe-password-123'
 validate_credentials || fail 'valid credentials rejected'
 pass 'credential validation accepts supported values'
