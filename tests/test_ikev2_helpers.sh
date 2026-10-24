@@ -58,6 +58,7 @@ pass 'public IPv4 parser rejects malformed and out-of-range octets'
 calls_file=$(mktemp)
 trap 'rm -f "$calls_file"' EXIT
 iptables() {
+  local IFS=' '
   printf '%s\n' "$*" >> "$calls_file"
   if [[ " $* " == *"-C INPUT -p udp --dport 500"* ]]; then return 0; fi
   if [[ " $* " == *' -C '* ]]; then return 1; fi
