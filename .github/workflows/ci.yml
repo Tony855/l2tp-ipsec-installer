@@ -24,7 +24,7 @@ jobs:
           sudo apt-get install -y shellcheck
       - name: Resolve VPN package dependencies
         run: |
-          sudo apt-get install --simulate -y strongswan-starter strongswan-charon libstrongswan-standard-plugins libcharon-extra-plugins xl2tpd ppp iptables iptables-persistent curl openssl certbot certbot
+          sudo apt-get install --simulate -y strongswan-starter strongswan-charon libstrongswan-standard-plugins libcharon-extra-plugins xl2tpd ppp iptables iptables-persistent curl openssl certbot
       - name: Bash syntax
         run: |
           bash -n install-L2TP_IPSec.sh
@@ -32,7 +32,7 @@ jobs:
           bash -n tests/test_iptables_ensure.sh
           bash -n tests/test_platform_detection.sh
       - name: ShellCheck
-        run: shellcheck --severity=warning install-L2TP_IPSec.sh tests/test_iptables_ensure.sh tests/test_platform_detection.sh
+        run: shellcheck --severity=warning install-L2TP_IPSec.sh install-IKEv2_IPSec.sh tests/test_iptables_ensure.sh tests/test_platform_detection.sh
       - name: Unit tests
         run: |
           bash tests/test_iptables_ensure.sh
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Resolve VPN package dependencies
         run: |
-          apt-get install --simulate -y strongswan-starter strongswan-charon libstrongswan-standard-plugins libcharon-extra-plugins xl2tpd ppp iptables iptables-persistent curl openssl
+          apt-get install --simulate -y strongswan-starter strongswan-charon libstrongswan-standard-plugins libcharon-extra-plugins xl2tpd ppp iptables iptables-persistent curl openssl certbot
       - name: Bash syntax
         run: |
           bash -n install-L2TP_IPSec.sh
