@@ -11,10 +11,6 @@ readonly IPSEC_SECRETS=/etc/ipsec.secrets
 readonly VPN_POOL=10.77.0.10-10.77.0.250
 readonly VPN_LOCAL_IP=10.77.0.1
 readonly VPN_SUBNET=10.77.0.0/24
-readonly CERT_DIR=/etc/ipsec.d/certs
-readonly KEY_DIR=/etc/ipsec.d/private
-readonly CERT_NAME=ikev2-server-cert.pem
-readonly KEY_NAME=ikev2-server-key.pem
 
 OS=''
 VERSION_ID=''
@@ -117,9 +113,7 @@ obtain_certificate() {
     certbot certonly --standalone --non-interactive --agree-tos --register-unsafely-without-email -d "$DOMAIN"
   fi
   [[ -s "$live_dir/fullchain.pem" && -s "$live_dir/privkey.pem" ]] || die '未找到有效的完整证书和私钥。'
-  install -d -m 755 "$CERT_DIR" "$KEY_DIR"
-  install -m 644 "$live_dir/fullchain.pem" "$CERT_DIR/$CERT_NAME"
-  install -m 600 "$live_dir/privkey.pem" "$KEY_DIR/$KEY_NAME"
+  # Use Certbot's stable live symlinks so renewals do not leave stale copies.
 }
 
 configure_ipsec() {
@@ -142,7 +136,7 @@ conn ikev2-eap
     left=%any
     leftid=@$DOMAIN
     leftauth=pubkey
-    leftcert=$CERT_NAME
+    leftcert=/etc/letsencrypt/live/$DOMAIN/fullchain.pem
     leftsendcert=always
     leftsubnet=0.0.0.0/0
     right=%any
@@ -156,7 +150,7 @@ conn ikev2-eap
     esp=aes256-sha256,aes128-sha256!
 EOF2
   cat > "$IPSEC_SECRETS" <<EOF3
-: RSA $KEY_NAME
+: RSA /etc/letsencrypt/live/$DOMAIN/privkey.pem
 $VPN_USER : EAP "$VPN_PASSWORD"
 EOF3
   chmod 600 "$IPSEC_SECRETS"
@@ -191,6 +185,17 @@ configure_firewall() {
   iptables_ensure INPUT -p udp --dport 500 -j ACCEPT
   iptables_ensure INPUT -p udp --dport 4500 -j ACCEPT
   if command -v netfilter-persistent >/dev/null 2>&1; then netfilter-persistent save; else warn '未找到 netfilter-persistent；防火墙规则可能不会在重启后保留。'; fi
+}
+
+install_renewal_hook() {
+  local hook=/etc/letsencrypt/renewal-hooks/deploy/ikev2-strongswan-reload.sh
+  install -d -m 755 /etc/letsencrypt/renewal-hooks/deploy
+  cat > "$hook" <<EOFHOOK
+#!/usr/bin/env bash
+set -Eeuo pipefail
+systemctl restart "$STRONGSWAN_SERVICE"
+EOFHOOK
+  chmod 750 "$hook"
 }
 
 start_services() {
@@ -257,6 +262,7 @@ main() {
   enable_ip_forwarding
   configure_firewall
   start_services
+  install_renewal_hook
   show_config
   diagnose
   ok 'IKEv2 安装步骤完成；请用真实客户端验证证书信任、EAP 认证、DNS 和公网流量。'
