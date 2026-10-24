@@ -9,7 +9,6 @@ readonly LOG_FILE=/var/log/vpn-install.log
 readonly IPSEC_CONF=/etc/ipsec.conf
 readonly IPSEC_SECRETS=/etc/ipsec.secrets
 readonly VPN_POOL=10.77.0.10-10.77.0.250
-readonly VPN_LOCAL_IP=10.77.0.1
 readonly VPN_SUBNET=10.77.0.0/24
 
 OS=''
